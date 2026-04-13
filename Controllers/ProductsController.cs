@@ -24,6 +24,7 @@ public class ProductsController(EShopContext context) : ControllerBase
                 p.ProductName,
                 Suppliers = p.SupplierProducts.Select(sp => new
                 {
+                    sp.SupplierId,
                     sp.Supplier.SupplierName,
                     sp.PricePerKg
 
