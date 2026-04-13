@@ -15,6 +15,16 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<EShopContext>();
+
+    // Se till att databasen finns
+    await context.Database.MigrateAsync();
+
+    // Kör seed
+    await DbSeedData.SeedAsync(context);
+}
 
 app.MapControllers();
 
