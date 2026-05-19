@@ -3,33 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MormorBageri.Data;
 using MormorBageri.DTOs;
+using MormorBageri.DTOs.Products;
 using MormorBageri.Entities;
+using MormorBageri.interfaces;
 
 namespace MormorBageri.Controllers;
 
 [Route("api/products")]
 [ApiController]
-public class ProductsController(EShopContext context) : ControllerBase
+public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
 {
     [HttpGet()]
     public async Task<ActionResult> ListAllProducts()
     {
-        var products = await context.Products
-            .Include(p => p.SupplierProducts)
-            .ThenInclude(sp => sp.Supplier )
-            .Select( p=> new
-            {
-                p.Id,
-                p.ItemNumber,
-                p.ProductName,
-                Suppliers = p.SupplierProducts.Select(sp => new
-                {
-                    sp.SupplierId,
-                    sp.Supplier.SupplierName,
-                    sp.PricePerKg
-
-                })
-            }).ToListAsync();
+        var products = await unitOfWork.ProductRepository.ListAllProducts();
+            
         return Ok(new
         {
             Success= true,
@@ -40,26 +28,10 @@ public class ProductsController(EShopContext context) : ControllerBase
         });
     }
 
-    [HttpGet("{productName}")]
-    public async Task<ActionResult> FindProduct(string productName)
+    [HttpGet("{id}")]
+    public async Task<ActionResult> FindProduct(int id)
     {
-        var product = await context.Products
-            .Where(p=> p.ProductName == productName)
-            .Include(p=> p.SupplierProducts)
-            .ThenInclude(sp => sp.Supplier)
-            .Select(p=> new
-            {
-                p.Id,
-                p.ItemNumber,
-                p.ProductName,
-                Suppliers = p.SupplierProducts.Select(sp => new
-                {
-                    sp.SupplierId,
-                    sp.Supplier.SupplierName,
-                    sp.PricePerKg
-                })
-                
-            }).SingleOrDefaultAsync();
+        var product = await unitOfWork.ProductRepository.FindProduct(id);
         if(product is not null)
         {
             return Ok(new
@@ -73,6 +45,53 @@ public class ProductsController(EShopContext context) : ControllerBase
            
         
         return NotFound();
+    }
+
+
+    [HttpPost()]
+    public async Task<ActionResult> AddProduct(PostProductDto model)
+    {
+        try
+        {
+        if (await unitOfWork.ProductRepository.AddProduct(model))
+        {
+            await unitOfWork.Complete();
+            return StatusCode(201);
+
+        }
+            return StatusCode(500, "Ett server fel inträffade");
+            
+        }
+        catch
+        {
+            
+            return StatusCode(500, "Ett server fel inträffade");
+        }
+        
+    } 
+
+    [HttpPatch("{id}")]
+    public async Task<ActionResult> UpdateProductPrice(int id, PatchProductPriceDto model)
+    {
+        try
+        {
+        if (await unitOfWork.ProductRepository.UpdateProductPrice(id, model))
+        {
+            await unitOfWork.Complete();
+            return NoContent();
+        }
+
+        return StatusCode(500, "Något Serverfel inträffade");
+            
+        }
+        catch 
+        {
+            
+            return StatusCode(500, "Något Serverfel inträffade");
+
+        }
+
+        
     }
     
    

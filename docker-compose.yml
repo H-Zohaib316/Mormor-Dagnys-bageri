@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  db:
+    build: .
+    container_name: mormor-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mormordb
+ 

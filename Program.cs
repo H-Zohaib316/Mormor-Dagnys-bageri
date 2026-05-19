@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MormorBageri.Data;
+using MormorBageri.interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<EShopContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("sqlitedev"));
+    //options.UseNpgsql(builder.Configuration.GetConnectionString("postgresdev"));
 });
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddControllers();
 
@@ -23,7 +27,7 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
 
     // Kör seed
-    await DbSeedData.SeedAsync(context);
+    // await DbSeedData.SeedAsync(context);
 }
 
 app.MapControllers();

@@ -2,9 +2,8 @@
 
 namespace MormorBageri.Entities;
 
-public class Supplier
+public class Supplier : BaseEntity
 {
-    public int SupplierId { get; set; }
     
     [NotNull]
     public string SupplierName { get; set; }

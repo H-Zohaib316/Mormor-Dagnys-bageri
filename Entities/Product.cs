@@ -1,17 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
+﻿
 namespace MormorBageri.Entities;
 
-public class Product
+public class Product : BaseEntity
 {
-    public int Id { get; set; }
-    [NotNull]
-    public string ItemNumber { get; set; }
-    [NotNull]
-    public string ProductName { get; set; }
-    [NotNull]
-    public decimal Price { get; set; }
-    public List<SupplierProduct> SupplierProducts { get; set; }
+    public required string ProductName { get; set; }
+    public decimal PricePerPiece { get; set; }
+    public double Weight { get; set; }
+    public int PackageAmount { get; set; }
+    public DateOnly BestBeforeDate { get; set; }
+    public DateOnly ManufacturedDate { get; set; }
+    public int SupplierId { get; set; }
+
+    public List<OrderItem> OrderItems { get; set; } = [];
+    public List<SupplierProduct> SupplierProducts { get; set; } = [];
 
 
 }
